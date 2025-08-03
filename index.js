@@ -1,19 +1,28 @@
 const express = require("express");
-const axios = require("axios");
+const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-app.get("/orlando-time", async (req, res) => {
+app.use(cors());
+
+app.get("/orlando-time", (req, res) => {
   try {
-    const response = await axios.get("http://worldtimeapi.org/api/timezone/America/New_York");
-    const timeString = response.data.datetime.slice(11, 16); // "HH:MM"
-    res.json({ time: timeString });
+    const now = new Date();
+    const options = {
+      timeZone: "America/New_York",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    };
+    const time = now.toLocaleTimeString("en-US", options).slice(0, 5);
+    res.json({ time });
   } catch (error) {
-    console.error("Error fetching time:", error);
-    res.status(500).json({ error: "Failed to get time" });
+    console.error("Time error:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`✅ Server running on port ${PORT}`);
 });
+
